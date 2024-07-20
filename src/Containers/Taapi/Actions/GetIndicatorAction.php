@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace ASolonytkyi\Taapi\Containers\Taapi\Actions;
 
+use ASolonytkyi\Taapi\Containers\Taapi\Handlers\ErrorHandler;
+use ASolonytkyi\Taapi\Containers\Taapi\Resources\ApiResponse;
 use ASolonytkyi\Taapi\Containers\Taapi\Services\TaapiService;
+use ASolonytkyi\Taapi\Containers\Taapi\Validators\IndicatorValidator;
+use GuzzleHttp\Exception\RequestException;
 
 class GetIndicatorAction
 {
@@ -17,6 +21,16 @@ class GetIndicatorAction
 
     public function run(string $indicator, array $params): array
     {
-        return $this->taapiService->get($indicator, $params);
+        try {
+            IndicatorValidator::validate($indicator, $params);
+
+            $data = $this->taapiService->request($indicator, $params);
+
+            return ApiResponse::success($data);
+        } catch (RequestException $e) {
+            return ErrorHandler::handle($e);
+        } catch (\InvalidArgumentException $e) {
+            return ApiResponse::error($e->getMessage(), 400);
+        }
     }
 }

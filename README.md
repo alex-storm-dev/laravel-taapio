@@ -1,229 +1,169 @@
 
-# Laravel TAAPI.io Package
+# Laravel TAAPI Package
 
-This package provides easy integration with the [TAAPI.io](https://taapi.io/) API for Laravel applications using Porto architecture.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-  - [Fetching a Single Indicator](#fetching-a-single-indicator)
-  - [Fetching Multiple Indicators](#fetching-multiple-indicators)
-- [Available Actions](#available-actions)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
-- [Author](#author)
-- [Acknowledgements](#acknowledgements)
-- [Changelog](#changelog)
-- [Support](#support)
+A Laravel package to integrate with TAAPI.io for retrieving various financial indicators.
 
 ## Installation
 
-### 1. Install the package via Composer:
+1. Install the package via Composer:
 
-Run the following command to install the package:
+    ```sh
+    composer require asolonytkyi/laravel-taapi
+    ```
 
-```sh
-composer require asolonytskyi/laravel-taapi
-```
+2. Publish the configuration file:
 
-### 2. Publish the configuration file:
+    ```sh
+    php artisan vendor:publish --provider="ASolonytkyi\Taapi\Containers\Taapi\Providers\TaapiServiceProvider"
+    ```
 
-Run the following command to publish the configuration file:
+3. Add your TAAPI.io API key to your `.env` file:
 
-```sh
-php artisan vendor:publish --provider="ASolonytkyi\Taapi\Containers\Taapi\Providers\TaapiServiceProvider"
-```
-
-### 3. Set your TAAPI API key in the `.env` file:
-
-Add your TAAPI API key to the `.env` file:
-
-```env
-TAAPI_API_KEY=your-api-key
-```
+    ```env
+    TAAPI_API_KEY=your_api_key_here
+    ```
 
 ## Configuration
 
-After publishing the configuration file, you can find it at `config/taapi.php`. This file contains the configuration options for the TAAPI service.
+The package configuration file is located at `config/taapi.php`. You can customize the configuration as needed.
 
 ## Usage
 
-You can use the `Taapi` facade to interact with the TAAPI.io API. Here are some examples:
+### Retrieving a Single Indicator
 
-### Fetching a Single Indicator
+To retrieve a single indicator, use the `getIndicator` method:
 
 ```php
-use Taapi;
+use ASolonytkyi\Taapi\Containers\Taapi\Facades\Taapi;
+use ASolonytkyi\Taapi\Containers\Taapi\Constants\Exchanges;
+use ASolonytkyi\Taapi\Containers\Taapi\Constants\Intervals;
+use ASolonytkyi\Taapi\Containers\Taapi\Constants\Indicators;
 
-$data = Taapi::getIndicator('exampleIndicator', [
+$data = Taapi::getIndicator(Indicators::ADX, [
+    'exchange' => Exchanges::BINANCE,
     'symbol' => 'BTC/USDT',
-    'exchange' => 'binance'
+    'interval' => Intervals::ONE_HOUR,
+    'backtrack' => 5,
+    'chart' => 'candlestick',
+    'addResultTimestamp' => true,
+    'gaps' => false,
+    'results' => 'json',
+    'period' => 14,
+    'multiplier' => 1.5,
 ]);
+
+print_r($data);
 ```
 
-### Fetching Multiple Indicators
+### Retrieving Multiple Indicators
+
+To retrieve multiple indicators in a single request, use the `getIndicators` method:
 
 ```php
-use Taapi;
+use ASolonytkyi\Taapi\Containers\Taapi\Facades\Taapi;
+use ASolonytkyi\Taapi\Containers\Taapi\Constants\Exchanges;
+use ASolonytkyi\Taapi\Containers\Taapi\Constants\Intervals;
+use ASolonytkyi\Taapi\Containers\Taapi\Constants\Indicators;
 
-$indicators = Taapi::getIndicators([
+$data = Taapi::getIndicators([
+    'exchange' => Exchanges::BINANCE,
     'symbol' => 'BTC/USDT',
-    'exchange' => 'binance'
+    'interval' => Intervals::ONE_MINUTE,
+    'indicators' => [
+        [
+            'indicator' => Indicators::SUPER_TREND,
+            'period' => 20,
+            'multiplier' => 12.0,
+        ],
+        [
+            'indicator' => Indicators::CMO,
+            'period' => 20,
+        ],
+        [
+            'indicator' => Indicators::RSI,
+            'period' => 20,
+        ],
+        [
+            'indicator' => Indicators::TANH,
+            'period' => 20,
+        ],
+        [
+            'indicator' => Indicators::EMA,
+            'period' => 20,
+        ],
+        [
+            'indicator' => Indicators::EOM,
+            'period' => 20,
+        ],
+    ],
 ]);
+
+print_r($data);
 ```
 
-## Available Actions
+## Available Indicators
 
-Currently, the package supports the following actions:
+The following indicators are available for use:
 
-- `getIndicator`: Fetches data for a single indicator.
-- `getIndicators`: Fetches data for multiple indicators.
+- `Indicators::SUPER_TREND`
+- `Indicators::CMO`
+- `Indicators::RSI`
+- `Indicators::TANH`
+- `Indicators::EMA`
+- `Indicators::EOM`
+- `Indicators::ADX`
+- [more](https://taapi.io/indicators/)
 
-### Adding New Actions
+## Available Exchanges
 
-To extend the package with new actions:
+The following [exchanges](https://taapi.io/exchanges/) are available for use:
 
-1. Create a new action class in the `Actions` directory. For example, `GetAnotherIndicatorAction.php`.
-2. Implement the logic for the new action.
-3. Use the new action via the `Taapi` facade.
+- `Exchanges::BINANCE`
+- `Exchanges::BINANCE_FUTURES`
+- `Exchanges::BITSTAMP`
+- `Exchanges::WHITEBIT`
+- `Exchanges::BYBIT`
+- `Exchanges::GATEIO`
+- `Exchanges::COINBASE`
+- `Exchanges::BINANCE_US`
+- `Exchanges::KRAKEN`
 
-Example:
+## Available Intervals
 
-**New Action Class (`src/Containers/Taapi/Actions/GetAnotherIndicatorAction.php`):**
+The following [intervals](https://taapi.io/documentation/integration/direct/) are available for use:
+
+- `Intervals::ONE_MINUTE`
+- `Intervals::FIVE_MINUTES`
+- `Intervals::FIFTEEN_MINUTES`
+- `Intervals::THIRTY_MINUTES`
+- `Intervals::ONE_HOUR`
+- `Intervals::TWO_HOURS`
+- `Intervals::FOUR_HOURS`
+- `Intervals::TWELVE_HOURS`
+- `Intervals::ONE_DAY`
+
+## Error Handling
+
+Errors are handled and returned as arrays with `status`, `message`, and `statusCode` keys. Example:
+
 ```php
-<?php
+$data = Taapi::getIndicator('invalid_indicator', [
+    'exchange' => Exchanges::BINANCE,
+    'symbol' => 'BTC/USDT',
+    'interval' => Intervals::ONE_HOUR,
+]);
 
-declare(strict_types=1);
-
-namespace ASolonytkyi\Taapi\Containers\Taapi\Actions;
-
-use ASolonytkyi\Taapi\Containers\Taapi\Services\TaapiService;
-
-class GetAnotherIndicatorAction
-{
-    protected TaapiService $taapiService;
-
-    public function __construct(TaapiService $taapiService)
-    {
-        $this->taapiService = $taapiService;
-    }
-
-    public function run(array $params): array
-    {
-        return $this->taapiService->get('another-endpoint', $params);
-    }
+if ($data['status'] === 'error') {
+    echo 'Error: ' . $data['message'];
 }
 ```
-
-**Using the New Action:**
-```php
-use Taapi;
-
-$data = Taapi::getAnotherIndicator([
-    'symbol' => 'ETH/USD',
-    'exchange' => 'coinbase'
-]);
-```
-
-## Testing
-
-To run the package tests, use the following command:
-
-```sh
-composer test
-```
-
-The tests are located in the `tests` directory and include basic tests to ensure the package is working correctly.
-
-**Example Test (`tests/TaapiTest.php`):**
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace ASolonytkyi\Taapi\Tests;
-
-use Orchestra\Testbench\TestCase;
-use ASolonytkyi\Taapi\Containers\Taapi\Providers\TaapiServiceProvider;
-use ASolonytkyi\Taapi\Containers\Taapi\Actions\GetIndicatorAction;
-use ASolonytkyi\Taapi\Containers\Taapi\Actions\GetIndicatorsAction;
-
-class TaapiTest extends TestCase
-{
-    protected function getPackageProviders($app): array
-    {
-        return [TaapiServiceProvider::class];
-    }
-
-    protected function getPackageAliases($app): array
-    {
-        return [
-            'Taapi' => Taapi::class,
-        ];
-    }
-
-    /** @test */
-    public function it_can_get_indicator_data(): void
-    {
-        $action = $this->app->make(GetIndicatorAction::class);
-        $data = $action->run('exampleIndicator', [
-            'symbol' => 'BTC/USDT',
-            'exchange' => 'binance'
-        ]);
-
-        $this->assertIsArray($data);
-    }
-
-    /** @test */
-    public function it_can_get_indicators_data(): void
-    {
-        $action = $this->app->make(GetIndicatorsAction::class);
-        $data = $action->run([
-            'symbol' => 'BTC/USDT',
-            'exchange' => 'binance'
-        ]);
-
-        $this->assertIsArray($data);
-    }
-}
-```
-
-## Contributing
-
-Contributions are welcome! If you would like to contribute to this package, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Open a pull request.
-
-Please make sure to write tests for any new features or changes, and ensure all existing tests pass.
 
 ## License
 
-This package is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
 ## Author
 
-This package was developed by [Andrii Solonytskyi](https://github.com/asolonytskyi).
+- Alexandr Solonytskyi
 
-## Acknowledgements
-
-Special thanks to the contributors of the Laravel and TAAPI.io projects for their incredible work and support.
-
-## Changelog
-
-All notable changes to this project will be documented in this section.
-
-### [1.0.0] - 2024-07-20
-- Initial release
-
-## Support
-
-If you encounter any issues or have any questions, feel free to open an issue on the [GitHub repository](https://github.com/asolonytskyi/laravel-taapi).
-
-Thank you for using the Laravel TAAPI.io package!
+For more information, visit the [TAAPI.io documentation](https://taapi.io/documentation/).
