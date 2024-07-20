@@ -1,0 +1,42 @@
+{
+  "name": "asolonytskyi/laravel-taapio",
+  "description": "A Laravel package to integrate with TAAPI.io",
+  "keywords": ["laravel", "taapi", "api", "indicators"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andrii Solonytskyi",
+      "email": "alexsstorm@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.3|^7.4|^8.1|^8.2|^8.3",
+    "illuminate/support": "^8.0|^9.0|^10.0",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ASolonytkyi\\Taapi\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ASolonytkyi\\Taapi\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "ASolonytkyi\\Taapi\\Containers\\Taapi\\Providers\\TaapiServiceProvider"
+      ],
+      "aliases": {
+        "Taapi": "ASolonytkyi\\Taapi\\Containers\\Taapi\\Facades\\Taapi"
+      }
+    }
+  },
+  "minimum-stability": "stable",
+  "version": "1.0.0",
+  "require-dev": {
+    "phpunit/phpunit": "^11.2"
+  }
+}
