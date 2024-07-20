@@ -8,7 +8,7 @@ A Laravel package to integrate with TAAPI.io for retrieving various financial in
 1. Install the package via Composer:
 
     ```sh
-    composer require asolonytkyi/laravel-taapi
+    composer require asolonytkyi/laravel-taapio
     ```
 
 2. Publish the configuration file:
